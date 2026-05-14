@@ -1,11 +1,6 @@
 # wrangler.toml
-name = "aso-analyzer"
+name = "seedi"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Pages-specific config
-[env.production]
-name = "aso-analyzer"
-
-[env.staging]
-name = "aso-analyzer-staging"
+pages_build_output_dir = ".vercel/output/static"
