@@ -11,6 +11,9 @@ export function Header() {
           <span>ASO Analyzer</span>
         </Link>
         <nav className="flex items-center gap-4 text-sm text-gray-600">
+          <Link href="/tracker" className="hover:text-gray-900 transition-colors">
+            Tracker
+          </Link>
           <Link href="/favorites" className="hover:text-gray-900 transition-colors">
             Favorites
           </Link>
