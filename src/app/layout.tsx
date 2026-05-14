@@ -5,9 +5,38 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ASO Analyzer — App Store Keyword Research",
+  title: {
+    default: "ASO Analyzer — App Store Keyword Research",
+    template: "%s | ASO Analyzer",
+  },
   description:
-    "Research keywords, find trending apps, and unlock ASO insights for the iOS App Store.",
+    "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities in the App Store.",
+  keywords: [
+    "ASO",
+    "App Store Optimization",
+    "keyword research",
+    "iOS",
+    "app marketing",
+    "competitor analysis",
+  ],
+  openGraph: {
+    title: "ASO Analyzer — App Store Keyword Research",
+    description:
+      "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities.",
+    url: "https://aso-analyzer.pages.dev",
+    siteName: "ASO Analyzer",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ASO Analyzer — App Store Keyword Research",
+    description:
+      "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
