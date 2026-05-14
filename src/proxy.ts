@@ -16,7 +16,7 @@ export function proxy(request: NextRequest): NextResponse {
     request.headers.get("x-real-ip") ??
     "127.0.0.1";
 
-  const result = checkRateLimit(`api:${ip}`, 50, 3_600_000);
+  const result = checkRateLimit(`api:${ip}`, 200, 3_600_000);
 
   if (!result.allowed) {
     return NextResponse.json(

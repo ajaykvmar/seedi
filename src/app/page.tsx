@@ -16,24 +16,7 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [lastQuery, setLastQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const { isFavorite, toggleFavorite } = useFavorites();
-
-  const handleQueryChange = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-    try {
-      const res = await fetch(`/api/suggestions?q=${encodeURIComponent(query)}`);
-      if (res.ok) {
-        const json = await res.json();
-        setSuggestions(json.suggestions ?? []);
-      }
-    } catch {
-      setSuggestions([]);
-    }
-  }, []);
 
   const doSearch = useCallback(
     async (query: string, cc?: string) => {
@@ -94,7 +77,7 @@ export default function HomePage() {
           )}
 
           <div className="flex justify-center items-center gap-3 mb-8">
-            <SearchBar onSearch={(q) => doSearch(q)} onQueryChange={handleQueryChange} loading={loading} suggestions={suggestions} onSelectSuggestion={(s) => doSearch(s)} />
+            <SearchBar onSearch={(q) => doSearch(q)} loading={loading} />
             <CountrySelector value={country} onChange={handleCountryChange} />
           </div>
 
