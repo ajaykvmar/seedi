@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Header } from "@/components/header";
 import { AppResult } from "@/lib/types";
 import { Star, ExternalLink, ChevronLeft } from "lucide-react";
+import { KeywordOverlap } from "@/components/keyword-overlap";
 
 function formatCount(count: number): string {
   if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
@@ -21,6 +22,10 @@ export default function AppDetailPage() {
   const [app, setApp] = useState<AppResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [competitorData, setCompetitorData] = useState<{
+    keywords: string[];
+    competitors: { app: AppResult; overlap: { overlapCount: number; overlapPercentage: number; shared: string[] } }[];
+  } | null>(null);
 
   useEffect(() => {
     async function fetchApp() {
@@ -34,6 +39,13 @@ export default function AppDetailPage() {
         }
         const data: AppResult = await res.json();
         setApp(data);
+
+        // Fetch competitor analysis in parallel
+        const compRes = await fetch(`/api/competitor?id=${encodeURIComponent(id)}`);
+        if (compRes.ok) {
+          const compData = await compRes.json();
+          setCompetitorData({ keywords: compData.keywords, competitors: compData.competitors });
+        }
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Failed to load app");
       } finally {
@@ -158,6 +170,10 @@ export default function AppDetailPage() {
             </div>
           </dl>
         </section>
+
+        {competitorData && (
+          <KeywordOverlap competitors={competitorData.competitors} keywords={competitorData.keywords} />
+        )}
 
         {app.genres.length > 0 && (
           <section>
