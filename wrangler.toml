@@ -1,0 +1,11 @@
+# wrangler.toml
+name = "aso-analyzer"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages-specific config
+[env.production]
+name = "aso-analyzer"
+
+[env.staging]
+name = "aso-analyzer-staging"
