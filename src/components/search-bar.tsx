@@ -10,6 +10,7 @@ interface SearchBarProps {
   loading?: boolean;
   suggestions?: string[];
   onSelectSuggestion?: (suggestion: string) => void;
+  onQueryChange?: (query: string) => void;
 }
 
 export function SearchBar({
@@ -18,6 +19,7 @@ export function SearchBar({
   loading = false,
   suggestions = [],
   onSelectSuggestion,
+  onQueryChange,
 }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -77,6 +79,7 @@ export function SearchBar({
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
+              onQueryChange?.(e.target.value);
               setShowSuggestions(e.target.value.length >= 2);
             }}
             onFocus={() => {
