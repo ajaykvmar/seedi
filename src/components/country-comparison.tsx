@@ -122,10 +122,10 @@ export function CountryComparison() {
               const ts = r.targetScore ?? 0;
               const tier = ts >= 65 ? "good" : ts >= 40 ? "okay" : "tough";
               const borderColor = tier === "good"
-                ? "border-l-green-500"
+                ? "border-green-500/40"
                 : tier === "okay"
-                ? "border-l-amber-400"
-                : "border-l-red-400";
+                ? "border-amber-400/40"
+                : "border-red-400/40";
               const tierLabel = tier === "good" ? "Target" : tier === "okay" ? "Okay" : "Tough";
               const tierBadge = tier === "good"
                 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
@@ -134,7 +134,7 @@ export function CountryComparison() {
                 : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
 
               return (
-                <Card key={r.country} className={`p-4 border-l-4 ${borderColor}`}>
+                <Card key={r.country} className={`p-4 border-2 ${borderColor}`}>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">{COUNTRY_FLAGS[r.country] || "🌍"}</span>
                     <span className="font-semibold">{COUNTRY_NAMES[r.country] || r.country.toUpperCase()}</span>
