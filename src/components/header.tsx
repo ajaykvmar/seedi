@@ -13,9 +13,6 @@ export function Header() {
           <Link href="/charts" className={buttonVariants({ variant: "ghost", size: "sm" })}>
             Charts
           </Link>
-          <Link href="/features" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            Features
-          </Link>
           <Link href="/multi-country" className={buttonVariants({ variant: "ghost", size: "sm" })}>
             Countries
           </Link>
