@@ -22,23 +22,21 @@ interface MultiCountryResponse {
 }
 
 const COUNTRY_FLAGS: Record<string, string> = {
-  us: "🇺🇸", gb: "🇬🇧", ca: "🇨🇦", au: "🇦🇺", in: "🇮🇳",
-  de: "🇩🇪", fr: "🇫🇷", es: "🇪🇸", it: "🇮🇹", nl: "🇳🇱",
-  jp: "🇯🇵", kr: "🇰🇷", sg: "🇸🇬",
-  br: "🇧🇷", mx: "🇲🇽",
-  ru: "🇷🇺", tr: "🇹🇷", pl: "🇵🇱",
-  se: "🇸🇪", no: "🇳🇴", dk: "🇩🇰", ch: "🇨🇭",
-  ae: "🇦🇪", za: "🇿🇦", il: "🇮🇱",
+  us: "🇺🇸", ca: "🇨🇦", gb: "🇬🇧", au: "🇦🇺", ie: "🇮🇪", nz: "🇳🇿",
+  de: "🇩🇪", fr: "🇫🇷", nl: "🇳🇱", be: "🇧🇪", lu: "🇱🇺", at: "🇦🇹",
+  ch: "🇨🇭", se: "🇸🇪", no: "🇳🇴", dk: "🇩🇰", fi: "🇫🇮", is: "🇮🇸",
+  it: "🇮🇹", es: "🇪🇸", cy: "🇨🇾", mt: "🇲🇹",
+  jp: "🇯🇵", kr: "🇰🇷", sg: "🇸🇬", hk: "🇭🇰", tw: "🇹🇼",
+  ae: "🇦🇪", il: "🇮🇱", qa: "🇶🇦", kw: "🇰🇼",
 };
 
 const COUNTRY_NAMES: Record<string, string> = {
-  us: "USA", gb: "UK", ca: "Canada", au: "Australia", in: "India",
-  de: "Germany", fr: "France", es: "Spain", it: "Italy", nl: "Netherlands",
-  jp: "Japan", kr: "South Korea", sg: "Singapore",
-  br: "Brazil", mx: "Mexico",
-  ru: "Russia", tr: "Türkiye", pl: "Poland",
-  se: "Sweden", no: "Norway", dk: "Denmark", ch: "Switzerland",
-  ae: "UAE", za: "South Africa", il: "Israel",
+  us: "USA", ca: "Canada", gb: "UK", au: "Australia", ie: "Ireland", nz: "New Zealand",
+  de: "Germany", fr: "France", nl: "Netherlands", be: "Belgium", lu: "Luxembourg", at: "Austria",
+  ch: "Switzerland", se: "Sweden", no: "Norway", dk: "Denmark", fi: "Finland", is: "Iceland",
+  it: "Italy", es: "Spain", cy: "Cyprus", mt: "Malta",
+  jp: "Japan", kr: "South Korea", sg: "Singapore", hk: "Hong Kong", tw: "Taiwan",
+  ae: "UAE", il: "Israel", qa: "Qatar", kw: "Kuwait",
 };
 
 function ScoreBar({ value, label, color }: { value: number; label: string; color: string }) {

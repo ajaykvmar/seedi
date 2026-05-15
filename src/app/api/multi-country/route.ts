@@ -3,13 +3,18 @@ import { searchApps } from "@/lib/apple-api";
 import { calculateKeywordScores } from "@/lib/keyword-analysis";
 
 const DEFAULT_COUNTRIES = [
-  "us", "gb", "ca", "au", "in",   // EN-first markets
-  "de", "fr", "es", "it", "nl",   // Western Europe
-  "jp", "kr", "sg",               // East Asia + SEA hub
-  "br", "mx",                     // Latin America
-  "ru", "tr", "pl",               // Eastern Europe / Eurasia
-  "se", "no", "dk", "ch",         // Nordics + Switzerland
-  "ae", "za", "il",               // ME / Africa
+  // English-speaking wealthy markets
+  "us", "ca", "gb", "au", "ie", "nz",
+  // Western / Central Europe
+  "de", "fr", "nl", "be", "lu", "at",
+  // Nordics + Switzerland
+  "ch", "se", "no", "dk", "fi", "is",
+  // Southern Europe
+  "it", "es", "cy", "mt",
+  // East Asia wealthy
+  "jp", "kr", "sg", "hk", "tw",
+  // Middle East wealthy
+  "ae", "il", "qa", "kw",
 ];
 
 export async function GET(request: NextRequest) {
