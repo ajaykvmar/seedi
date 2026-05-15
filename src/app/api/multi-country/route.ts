@@ -41,9 +41,15 @@ export async function GET(request: NextRequest) {
           const scores = calculateKeywordScores(apps);
           const totalResults = apps.length;
           const topName = apps[0]?.trackName ?? null;
+          const targetScore = Math.round(
+            scores.opportunity * 0.5
+            + (100 - scores.difficulty) * 0.25
+            + scores.popularity * 0.25
+          );
           return {
             country,
             scores,
+            targetScore,
             totalResults,
             topApp: topName,
             topRatingCount: apps[0]?.userRatingCount ?? 0,
@@ -52,6 +58,7 @@ export async function GET(request: NextRequest) {
           return {
             country,
             scores: { popularity: 0, difficulty: 0, opportunity: 0 },
+            targetScore: 0,
             totalResults: 0,
             topApp: null,
             topRatingCount: 0,
@@ -60,6 +67,9 @@ export async function GET(request: NextRequest) {
         }
       })
     );
+
+    // Sort: best markets first
+    results.sort((a, b) => (b.targetScore ?? 0) - (a.targetScore ?? 0));
 
     return NextResponse.json({
       query: term.trim(),

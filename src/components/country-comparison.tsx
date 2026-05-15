@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 interface CountryScore {
   country: string;
   scores: { popularity: number; difficulty: number; opportunity: number };
+  targetScore: number;
   totalResults: number;
   topApp: string | null;
   topRatingCount: number;
@@ -114,32 +115,54 @@ export function CountryComparison() {
       {data && !loading && (
         <>
           <p className="text-sm text-muted-foreground mb-4">
-            Comparing &ldquo;{data.query}&rdquo; across {data.results.length} countries
+            Comparing &ldquo;{data.query}&rdquo; across {data.results.length} countries &mdash; ranked by target score
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.results.map((r) => (
-              <Card key={r.country} className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg">{COUNTRY_FLAGS[r.country] || "🌍"}</span>
-                  <span className="font-semibold">{COUNTRY_NAMES[r.country] || r.country.toUpperCase()}</span>
-                  {LOW_CAPITA.has(r.country) && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground/60 border-muted-foreground/20">low capita</Badge>}
-                  {r.error && <Badge variant="outline" className="text-xs ml-auto">No data</Badge>}
-                </div>
-                {!r.error ? (
-                  <div className="space-y-1.5">
-                    <ScoreBar value={r.scores.popularity} label="Popularity" color="bg-blue-500" />
-                    <ScoreBar value={r.scores.difficulty} label="Difficulty" color="bg-red-500" />
-                    <ScoreBar value={r.scores.opportunity} label="Opportunity" color="bg-green-500" />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
-                      <span>{r.totalResults} apps</span>
-                      <span className="truncate ml-2">{r.topApp ? r.topApp.slice(0, 24) : "—"}</span>
-                    </div>
+            {data.results.map((r, i) => {
+              const ts = r.targetScore ?? 0;
+              const tier = ts >= 65 ? "good" : ts >= 40 ? "okay" : "tough";
+              const borderColor = tier === "good"
+                ? "border-l-green-500"
+                : tier === "okay"
+                ? "border-l-amber-400"
+                : "border-l-red-400";
+              const tierLabel = tier === "good" ? "Target" : tier === "okay" ? "Okay" : "Tough";
+              const tierBadge = tier === "good"
+                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                : tier === "okay"
+                ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+
+              return (
+                <Card key={r.country} className={`p-4 border-l-4 ${borderColor}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">{COUNTRY_FLAGS[r.country] || "🌍"}</span>
+                    <span className="font-semibold">{COUNTRY_NAMES[r.country] || r.country.toUpperCase()}</span>
+                    {LOW_CAPITA.has(r.country) && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground/60 border-muted-foreground/20">low capita</Badge>}
+                    {r.error && <Badge variant="outline" className="text-xs ml-auto">No data</Badge>}
+                    {!r.error && (
+                      <Badge className={`ml-auto text-[10px] px-1.5 py-0 h-4 ${tierBadge}`}>
+                        #{i + 1} {tierLabel}
+                      </Badge>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">No data available for this country</p>
-                )}
-              </Card>
-            ))}
+                  {!r.error ? (
+                    <div className="space-y-1.5">
+                      <ScoreBar value={ts} label="Target Score" color="bg-emerald-500" />
+                      <ScoreBar value={r.scores.popularity} label="Popularity" color="bg-blue-500" />
+                      <ScoreBar value={r.scores.difficulty} label="Difficulty" color="bg-red-500" />
+                      <ScoreBar value={r.scores.opportunity} label="Opportunity" color="bg-green-500" />
+                      <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                        <span>{r.totalResults} apps</span>
+                        <span className="truncate ml-2">{r.topApp ? r.topApp.slice(0, 24) : "—"}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No data available for this country</p>
+                  )}
+                </Card>
+              );
+            })}
           </div>
         </>
       )}
