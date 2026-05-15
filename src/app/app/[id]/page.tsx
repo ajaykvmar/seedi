@@ -26,6 +26,7 @@ export default function AppDetailPage() {
     keywords: string[];
     competitors: { app: AppResult; overlap: { overlapCount: number; overlapPercentage: number; shared: string[] } }[];
   } | null>(null);
+  const [developerApps, setDeveloperApps] = useState<AppResult[] | null>(null);
 
   useEffect(() => {
     async function fetchApp() {
@@ -45,6 +46,15 @@ export default function AppDetailPage() {
         if (compRes.ok) {
           const compData = await compRes.json();
           setCompetitorData({ keywords: compData.keywords, competitors: compData.competitors });
+        }
+
+        // Fetch developer portfolio
+        if (data.artistId) {
+          const devRes = await fetch(`/api/developer?id=${data.artistId}&country=${"us"}`);
+          if (devRes.ok) {
+            const devData = await devRes.json();
+            setDeveloperApps(devData.apps.filter((a: AppResult) => a.trackId !== data.trackId).slice(0, 10));
+          }
         }
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Failed to load app");
@@ -173,6 +183,33 @@ export default function AppDetailPage() {
 
         {competitorData && (
           <KeywordOverlap competitors={competitorData.competitors} keywords={competitorData.keywords} />
+        )}
+
+        {developerApps && developerApps.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">More by {app.sellerName}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {developerApps.map((devApp) => (
+                <Link
+                  key={devApp.trackId}
+                  href={`/app/${devApp.trackId}`}
+                  className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  <Image
+                    src={devApp.artworkUrl100}
+                    alt={devApp.trackName}
+                    width={56}
+                    height={56}
+                    className="rounded-xl"
+                  />
+                  <span className="text-xs text-gray-700 text-center line-clamp-2 leading-tight">
+                    {devApp.trackName}
+                  </span>
+                  <span className="text-xs text-gray-400">{devApp.primaryGenreName}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {app.genres.length > 0 && (

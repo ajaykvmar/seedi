@@ -48,6 +48,24 @@ export async function lookupApp(
   return normalize(data.results[0]);
 }
 
+export async function lookupDeveloper(
+  artistId: number,
+  country = "us"
+): Promise<AppResult[]> {
+  const url = new URL(ITUNES_LOOKUP);
+  url.searchParams.set("id", String(artistId));
+  url.searchParams.set("entity", "software");
+  url.searchParams.set("country", country);
+
+  const res = await fetch(url.toString(), {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!res.ok) throw new Error(`iTunes API error: ${res.status}`);
+  const data: ItunesSearchResponse = await res.json();
+  return data.results.map(normalize);
+}
+
 function normalize(item: Record<string, unknown>): AppResult {
   return {
     trackId: item.trackId as number,
@@ -61,6 +79,8 @@ function normalize(item: Record<string, unknown>): AppResult {
     primaryGenreName: (item.primaryGenreName as string) ?? "Unknown",
     genres: (item.genres as string[]) ?? [],
     sellerName: (item.sellerName as string) ?? "Unknown",
+    sellerUrl: item.sellerUrl as string | undefined,
+    artistId: item.artistId as number | undefined,
     price: (item.price as number) ?? 0,
     formattedPrice: (item.formattedPrice as string) ?? "Free",
     currency: item.currency as string,

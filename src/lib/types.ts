@@ -11,6 +11,8 @@ export interface AppResult {
   primaryGenreName: string;
   genres: string[];
   sellerName: string;
+  sellerUrl?: string;
+  artistId?: number;
   price: number;
   formattedPrice: string;
   currency: string;
