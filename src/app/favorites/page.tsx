@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { AppCard } from "@/components/app-card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Heart } from "lucide-react";
 import { useFavorites } from "@/lib/favorites";
 import { AppResult } from "@/lib/types";
 
@@ -42,7 +46,14 @@ export default function FavoritesPage() {
     return (
       <>
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-12 text-center font-bold">LOADING...</div>
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <Skeleton className="h-6 w-32 mb-6" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-[88px] w-full" />
+            ))}
+          </div>
+        </div>
       </>
     );
   }
@@ -50,19 +61,19 @@ export default function FavoritesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+      <main className="min-h-[calc(100vh-3rem)]">
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <Link href="/" className="inline-flex items-center gap-1 mb-6 text-sm font-medium hover:underline underline-offset-2">
-            ← Back to search
+          <Link href="/" className={buttonVariants({ variant: "link", className: "mb-6 -ml-3 gap-1" })}>
+              <ArrowLeft className="h-4 w-4" /> Back to search
           </Link>
 
-          <h1 className="text-2xl font-black mb-6 uppercase">Favorites</h1>
+          <h1 className="text-2xl font-bold mb-6">Favorites</h1>
 
           {apps.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-6xl font-black text-gray-100 mb-3">♥</p>
-              <p className="text-lg font-bold text-gray-300">No favorites yet</p>
-              <p className="text-sm mt-1 text-gray-200">Save apps from search results</p>
+              <Heart className="h-16 w-16 mx-auto mb-3 text-muted-foreground/20" />
+              <p className="text-lg font-medium text-muted-foreground">No favorites yet</p>
+              <p className="text-sm mt-1 text-muted-foreground/50">Save apps from search results</p>
             </div>
           ) : (
             <div className="space-y-3">

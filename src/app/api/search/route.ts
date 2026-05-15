@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchApps } from "@/lib/apple-api";
 import { calculateKeywordScores } from "@/lib/keyword-analysis";
 import { SearchResponse } from "@/lib/types";
+import { extractKeywordsFromTexts } from "@/lib/keyword-extraction";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = request.nextUrl;
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const results = await searchApps(term.trim(), country, Math.min(limit, 50));
     const scores = calculateKeywordScores(results);
-    const relatedTerms = extractRelatedTerms(results, term);
+    const relatedTerms = extractRelatedTerms(results, term.trim());
 
     const response: SearchResponse = {
       results,
@@ -46,11 +47,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 function extractRelatedTerms(
-  results: { genres?: string[] }[],
+  results: { trackName?: string }[],
   query: string
 ): string[] {
-  const terms = results
-    .flatMap((r) => r.genres ?? [])
-    .filter((g) => g.toLowerCase() !== query.toLowerCase());
-  return [...new Set(terms)].slice(0, 20);
+  // Extract from app titles only — they contain the actual keyword targeting
+  const texts: string[] = [];
+  for (const r of results) {
+    if (r.trackName) texts.push(r.trackName);
+  }
+  return extractKeywordsFromTexts(texts, query);
 }

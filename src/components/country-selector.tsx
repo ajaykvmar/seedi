@@ -1,6 +1,13 @@
 // src/components/country-selector.tsx
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/countries";
 
 interface CountrySelectorProps {
@@ -10,16 +17,17 @@ interface CountrySelectorProps {
 
 export function CountrySelector({ value, onChange }: CountrySelectorProps) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="px-3 py-2.5 bg-white border-2 border-black text-sm font-medium focus:outline-none cursor-pointer"
-    >
-      {COUNTRIES.map((c) => (
-        <option key={c.code} value={c.code}>
-          {c.flag} {c.storeName}
-        </option>
-      ))}
-    </select>
+    <Select value={value} onValueChange={(v) => v && onChange(v)}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {COUNTRIES.map((c) => (
+          <SelectItem key={c.code} value={c.code}>
+            {c.flag} {c.storeName}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

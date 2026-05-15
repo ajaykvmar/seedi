@@ -1,11 +1,16 @@
 // src/app/app/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/header";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, ExternalLink, Star } from "lucide-react";
 import { AppResult } from "@/lib/types";
 import { ReviewSection } from "@/components/review-section";
 import { KeywordOverlap } from "@/components/keyword-overlap";
@@ -18,6 +23,7 @@ function formatCount(count: number): string {
 
 export default function AppDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const [app, setApp] = useState<AppResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +73,17 @@ export default function AppDetailPage() {
     return (
       <>
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-12 text-center font-bold">LOADING...</div>
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex gap-5 mb-8">
+            <Skeleton className="h-[100px] w-[100px]" />
+            <div className="flex-1 space-y-3">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+        </div>
       </>
     );
   }
@@ -77,11 +93,11 @@ export default function AppDetailPage() {
       <>
         <Header />
         <div className="max-w-3xl mx-auto px-4 py-12">
-          <div className="p-4 border-2 border-black bg-black text-white text-sm font-bold">
-            {error || "App not found"}
-          </div>
-          <Link href="/" className="inline-flex items-center gap-1 mt-4 text-sm font-bold underline underline-offset-2">
-            ← Back to search
+          <Card className="p-4 bg-destructive text-destructive-foreground">
+            <p className="text-sm font-medium">{error || "App not found"}</p>
+          </Card>
+          <Link href="/" className={buttonVariants({ variant: "link", className: "mt-4 gap-1" })}>
+              <ArrowLeft className="h-4 w-4" /> Back to search
           </Link>
         </div>
       </>
@@ -92,46 +108,39 @@ export default function AppDetailPage() {
     <>
       <Header />
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-1 mb-6 text-sm font-medium hover:underline underline-offset-2">
-          ← Back to search
+        <Link href="/" className={buttonVariants({ variant: "link", className: "mb-6 -ml-3 gap-1" })}>
+          <ArrowLeft className="h-4 w-4" /> Back to search
         </Link>
 
         {/* Header */}
-        <div className="flex items-start gap-5 mb-8 border-2 border-black p-5 bg-white">
+        <Card className="flex-row items-start gap-5 p-5 mb-8">
           <Image
             src={app.artworkUrl100}
             alt={app.trackName}
             width={100}
             height={100}
-            className="border-2 border-black"
+            className="rounded-lg border"
           />
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-black">{app.trackName}</h1>
-            <p className="text-sm font-medium text-gray-500">{app.sellerName}</p>
+            <h1 className="text-2xl font-bold">{app.trackName}</h1>
+            <p className="text-sm text-muted-foreground">{app.sellerName}</p>
             <div className="flex items-center gap-2 mt-2 text-sm">
               <span className="font-bold tabular-nums">{app.averageUserRating.toFixed(1)}</span>
-              <span className="text-gray-300">·</span>
-              <span className="text-gray-500">{formatCount(app.userRatingCount)} ratings</span>
-              <span className="text-gray-300">·</span>
-              <span className="text-gray-500">{app.primaryGenreName}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">{formatCount(app.userRatingCount)} ratings</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">{app.primaryGenreName}</span>
             </div>
-            <a
-              href={app.trackViewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-3 text-sm font-bold underline underline-offset-2"
-            >
-              View on App Store →
+            <a href={app.trackViewUrl} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "link", size: "sm", className: "mt-1 -ml-3 gap-1" })}>
+                View on App Store <ExternalLink className="h-3 w-3" />
             </a>
           </div>
-        </div>
+        </Card>
 
         {/* Screenshots */}
         {app.screenshotUrls.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
-              Screenshots
-            </h2>
+            <h2 className="text-sm font-semibold mb-4 border-b pb-2">Screenshots</h2>
             <div className="flex gap-3 overflow-x-auto pb-2">
               {app.screenshotUrls.slice(0, 5).map((url, i) => (
                 <Image
@@ -140,7 +149,7 @@ export default function AppDetailPage() {
                   alt={`${app.trackName} screenshot ${i + 1}`}
                   width={200}
                   height={433}
-                  className="flex-shrink-0 border-2 border-black"
+                  className="flex-shrink-0 rounded-md border"
                 />
               ))}
             </div>
@@ -149,51 +158,45 @@ export default function AppDetailPage() {
 
         {/* What's New */}
         <section className="mb-8">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
-            What&rsquo;s New
-          </h2>
-          <div className="border-2 border-black p-4">
+          <h2 className="text-sm font-semibold mb-4 border-b pb-2">What&rsquo;s New</h2>
+          <Card className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold">Version {app.version ?? "N/A"}</span>
+              <span className="font-medium">Version {app.version ?? "N/A"}</span>
               {app.currentVersionReleaseDate && (
-                <span className="text-xs font-medium text-gray-400">
+                <span className="text-xs text-muted-foreground">
                   {new Date(app.currentVersionReleaseDate).toLocaleDateString()}
                 </span>
               )}
             </div>
             {app.releaseNotes ? (
-              <p className="text-sm leading-relaxed whitespace-pre-line font-medium">{app.releaseNotes}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{app.releaseNotes}</p>
             ) : (
-              <p className="text-sm text-gray-300 italic">No release notes available</p>
+              <p className="text-sm text-muted-foreground/50 italic">No release notes available</p>
             )}
-          </div>
+          </Card>
         </section>
 
         {/* Description */}
         {app.description && (
           <section className="mb-8">
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
-              Description
-            </h2>
-            <p className="text-sm leading-relaxed whitespace-pre-line font-medium">{app.description}</p>
+            <h2 className="text-sm font-semibold mb-4 border-b pb-2">Description</h2>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{app.description}</p>
           </section>
         )}
 
         {/* App Info Grid */}
         <section className="mb-8">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
-            App Info
-          </h2>
-          <div className="grid grid-cols-2 border-2 border-black">
+          <h2 className="text-sm font-semibold mb-4 border-b pb-2">App Info</h2>
+          <div className="grid grid-cols-2 border rounded-lg overflow-hidden">
             {[
               { label: "Version", value: app.version ?? "N/A" },
               { label: "Size", value: app.fileSizeBytes ? `${(parseInt(app.fileSizeBytes) / 1_048_576).toFixed(1)} MB` : "N/A" },
               { label: "Min. OS", value: app.minimumOsVersion ?? "N/A" },
               { label: "Languages", value: app.languageCodesISO2A?.length ? `${app.languageCodesISO2A.length} languages` : "N/A" },
             ].map((row, i) => (
-              <div key={i} className={`flex flex-col p-3 ${i % 2 === 0 ? "border-r-2 border-black" : ""} ${i < 2 ? "border-b-2 border-black" : ""}`}>
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{row.label}</span>
-                <span className="font-bold mt-0.5">{row.value}</span>
+              <div key={i} className={`flex flex-col p-3 ${i % 2 === 0 ? "border-r" : ""} ${i < 2 ? "border-b" : ""} bg-card`}>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{row.label}</span>
+                <span className="font-medium mt-0.5">{row.value}</span>
               </div>
             ))}
           </div>
@@ -210,7 +213,7 @@ export default function AppDetailPage() {
         {/* Developer Portfolio */}
         {developerApps && developerApps.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
+            <h2 className="text-sm font-semibold mb-4 border-b pb-2">
               More by {app.sellerName}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -218,19 +221,20 @@ export default function AppDetailPage() {
                 <Link
                   key={devApp.trackId}
                   href={`/app/${devApp.trackId}`}
-                  className="flex flex-col items-center gap-2 p-3 border-2 border-black hover:bg-gray-50 transition-colors"
                 >
-                  <Image
-                    src={devApp.artworkUrl100}
-                    alt={devApp.trackName}
-                    width={56}
-                    height={56}
-                    className="border-2 border-black"
-                  />
-                  <span className="text-xs font-bold text-center line-clamp-2 leading-tight">
-                    {devApp.trackName}
-                  </span>
-                  <span className="text-xs text-gray-400">{devApp.primaryGenreName}</span>
+                  <Card className="flex flex-col items-center gap-2 p-3 hover:bg-accent/50 transition-colors">
+                    <Image
+                      src={devApp.artworkUrl100}
+                      alt={devApp.trackName}
+                      width={56}
+                      height={56}
+                      className="rounded-md border"
+                    />
+                    <span className="text-xs font-medium text-center line-clamp-2 leading-tight">
+                      {devApp.trackName}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{devApp.primaryGenreName}</span>
+                  </Card>
                 </Link>
               ))}
             </div>
@@ -240,14 +244,36 @@ export default function AppDetailPage() {
         {/* Categories */}
         {app.genres.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
-              Categories
-            </h2>
+            <h2 className="text-sm font-semibold mb-4 border-b pb-2">Categories</h2>
             <div className="flex flex-wrap gap-2">
               {app.genres.map((genre, i) => (
-                <span key={i} className="px-3 py-1 border-2 border-black text-sm font-bold">
+                <Badge
+                  key={i}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => router.push(`/?q=${encodeURIComponent(genre)}`)}
+                >
                   {genre}
-                </span>
+                </Badge>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Related Keywords */}
+        {competitorData && competitorData.keywords.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-sm font-semibold mb-4 border-b pb-2">Related Keywords</h2>
+            <div className="flex flex-wrap gap-2">
+              {competitorData.keywords.map((kw, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => router.push(`/?q=${encodeURIComponent(kw)}`)}
+                >
+                  {kw}
+                </Badge>
               ))}
             </div>
           </section>

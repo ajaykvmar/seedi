@@ -3,6 +3,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 import { ChartApp } from "@/lib/charts";
 
 interface ChartCardProps {
@@ -14,43 +15,40 @@ export function ChartCard({ app, rank }: ChartCardProps) {
   const router = useRouter();
 
   return (
-    <div
-      className="flex items-start gap-4 p-4 bg-white border-2 border-black hover:bg-gray-50 transition-colors cursor-pointer"
+    <Card
+      className="flex-row items-center gap-3 p-2.5 hover:bg-accent/50 transition-colors cursor-pointer"
       onClick={() => router.push(`/app/${app.id}`)}
     >
-      <div className="flex-shrink-0 w-8 text-center">
-        <span className="text-lg font-bold tabular-nums">{rank}</span>
+      <div className="flex-shrink-0 w-6 text-center">
+        <span className="text-sm font-bold tabular-nums text-muted-foreground">{rank}</span>
       </div>
 
       <div className="flex-shrink-0">
         <Image
           src={app.artworkUrl100}
           alt={app.name}
-          width={64}
-          height={64}
-          className="border-2 border-black"
+          width={40}
+          height={40}
+          className="rounded-md border"
         />
       </div>
 
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold truncate">{app.name}</h3>
-        <p className="text-sm font-medium text-gray-500 truncate">{app.artistName}</p>
-        <p className="text-xs text-gray-400 mt-1">
-          {app.releaseDate ? `Released ${new Date(app.releaseDate).toLocaleDateString()}` : ""}
-        </p>
+        <p className="text-sm font-medium truncate">{app.name}</p>
+        <p className="text-xs text-muted-foreground truncate">{app.artistName}</p>
       </div>
 
-      <div className="flex-shrink-0 self-center">
+      <div className="flex-shrink-0">
         <a
           href={app.url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="text-sm font-bold underline underline-offset-2"
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
         >
-          App Store →
+          App Store &nbsp;→
         </a>
       </div>
-    </div>
+    </Card>
   );
 }

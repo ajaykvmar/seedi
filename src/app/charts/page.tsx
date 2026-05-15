@@ -4,6 +4,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { CountrySelector } from "@/components/country-selector";
 import { ChartCard } from "@/components/chart-card";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type FeedType, type ChartFeed } from "@/lib/charts";
 import { Header } from "@/components/header";
 
@@ -49,24 +52,22 @@ export default function ChartsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+      <main className="min-h-[calc(100vh-3rem)]">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-black mb-6 uppercase">Charts</h1>
+          <h1 className="text-2xl font-bold mb-6">Charts</h1>
 
           <div className="flex flex-wrap items-center gap-4 mb-8">
-            <div className="flex border-2 border-black">
+            <div className="flex border rounded-md overflow-hidden">
               {FEEDS.map((f) => (
-                <button
+                <Button
                   key={f.value}
+                  variant={feed === f.value ? "default" : "ghost"}
+                  size="sm"
                   onClick={() => setFeed(f.value)}
-                  className={`px-4 py-2 text-sm font-bold tracking-wider transition-colors ${
-                    feed === f.value
-                      ? "bg-black text-white"
-                      : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                  className="rounded-none"
                 >
                   {f.label}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -75,7 +76,7 @@ export default function ChartsPage() {
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value))}
-              className="px-3 py-2 border-2 border-black bg-white text-sm font-bold focus:outline-none"
+              className="px-3 py-1.5 border rounded-md bg-background text-sm"
               aria-label="Result limit"
             >
               {LIMITS.map((l) => (
@@ -87,20 +88,22 @@ export default function ChartsPage() {
           </div>
 
           {loading && (
-            <div className="flex items-center justify-center py-20">
-              <div className="h-8 w-8 border-2 border-black border-t-transparent animate-spin" />
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-[88px] w-full" />
+              ))}
             </div>
           )}
 
           {error && (
-            <div className="border-2 border-black bg-black text-white p-4 text-sm font-bold">
-              {error}
-            </div>
+            <Card className="p-4 bg-destructive text-destructive-foreground">
+              <p className="text-sm font-medium">{error}</p>
+            </Card>
           )}
 
           {data && !loading && (
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+              <p className="text-xs text-muted-foreground mb-4">
                 {data.title} · {data.country.toUpperCase()} store · Updated {new Date(data.updated).toLocaleDateString()}
               </p>
               <div className="space-y-3">

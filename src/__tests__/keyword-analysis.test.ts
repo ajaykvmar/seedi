@@ -44,11 +44,25 @@ describe("calculateKeywordScores", () => {
   });
 
   it("returns opportunity inversely correlated with difficulty", () => {
+    // Easy: low ratings, only a few apps have keyword in title (title gap = opportunity)
     const easyApps = Array.from({ length: 10 }, (_, i) =>
-      makeApp({ trackId: i + 1, averageUserRating: 1.0, userRatingCount: 10 })
+      makeApp({
+        trackId: i + 1,
+        trackName: i < 3 ? `Fitness App ${i}` : `Random App ${i}`,
+        averageUserRating: 3.0,
+        userRatingCount: 50 + i * 10,
+        releaseDate: "2025-06-01T00:00:00Z",
+      })
     );
+    // Hard: high ratings, ALL apps have keyword in title (saturated)
     const hardApps = Array.from({ length: 10 }, (_, i) =>
-      makeApp({ trackId: i + 1, averageUserRating: 5.0, userRatingCount: 100000 })
+      makeApp({
+        trackId: i + 1,
+        trackName: `Fitness Pro ${i}`,
+        averageUserRating: 4.8,
+        userRatingCount: 100000 + i * 50000,
+        releaseDate: "2018-01-01T00:00:00Z",
+      })
     );
     expect(calculateKeywordScores(easyApps).opportunity).toBeGreaterThan(
       calculateKeywordScores(hardApps).opportunity

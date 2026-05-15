@@ -1,16 +1,20 @@
 // src/app/page.tsx
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { SearchBar } from "@/components/search-bar";
 import { CountrySelector } from "@/components/country-selector";
 import { SearchResults } from "@/components/search-results";
+import { Card } from "@/components/ui/card";
 import { SearchResponse } from "@/lib/types";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 import { useFavorites } from "@/lib/favorites";
 
-export default function HomePage() {
+function HomePageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [data, setData] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,12 +22,28 @@ export default function HomePage() {
   const [lastQuery, setLastQuery] = useState("");
   const { isFavorite, toggleFavorite } = useFavorites();
 
+  // Auto-search when ?q= param is present on mount
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q.trim().length >= 2) {
+      doSearch(q.trim());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const doSearch = useCallback(
     async (query: string, cc?: string) => {
       const countryCode = cc ?? country;
       setLoading(true);
       setError("");
       setLastQuery(query);
+
+      // Update URL so searches are shareable/bookmarkable
+      const params = new URLSearchParams();
+      params.set("q", query);
+      if (countryCode !== DEFAULT_COUNTRY) params.set("country", countryCode);
+      router.replace(`/?${params.toString()}`, { scroll: false });
+
       try {
         const res = await fetch(
           `/api/search?q=${encodeURIComponent(query)}&country=${countryCode}`
@@ -40,7 +60,7 @@ export default function HomePage() {
         setLoading(false);
       }
     },
-    [country]
+    [country, router]
   );
 
   const handleCountryChange = useCallback(
@@ -63,14 +83,14 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+      <main className="min-h-[calc(100vh-3rem)]">
         <div className="max-w-5xl mx-auto px-4 py-12">
           {!data && (
             <div className="text-center mb-10">
-              <h1 className="text-5xl font-black tracking-tighter mb-3 uppercase">
+              <h1 className="text-5xl font-bold tracking-tight mb-3">
                 SEEDI
               </h1>
-              <p className="text-base font-medium text-gray-500 uppercase tracking-wider">
+              <p className="text-base text-muted-foreground">
                 App Store Intelligence
               </p>
             </div>
@@ -82,9 +102,9 @@ export default function HomePage() {
           </div>
 
           {error && (
-            <div className="max-w-2xl mx-auto mb-8 p-4 border-2 border-black bg-black text-white text-sm font-bold">
-              {error}
-            </div>
+            <Card className="max-w-2xl mx-auto mb-8 p-4 bg-destructive text-destructive-foreground">
+              <p className="text-sm font-medium">{error}</p>
+            </Card>
           )}
 
           {data && (
@@ -97,9 +117,9 @@ export default function HomePage() {
           )}
 
           {!data && !loading && (
-            <div className="text-center mt-20 text-gray-300">
-              <p className="text-lg font-bold">Search for an app or keyword</p>
-              <p className="text-sm mt-2">
+            <div className="text-center mt-20 text-muted-foreground">
+              <p className="text-lg font-medium">Search for an app or keyword</p>
+              <p className="text-sm mt-2 text-muted-foreground/60">
                 e.g. &ldquo;instagram&rdquo;, &ldquo;fitness tracker&rdquo;, &ldquo;photo editor&rdquo;
               </p>
             </div>
@@ -107,5 +127,13 @@ export default function HomePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomePageContent />
+    </Suspense>
   );
 }

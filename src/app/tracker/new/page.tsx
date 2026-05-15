@@ -9,10 +9,13 @@ import { Header } from "@/components/header";
 import { SearchBar } from "@/components/search-bar";
 import { CountrySelector } from "@/components/country-selector";
 import { AppCard } from "@/components/app-card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { useTracker } from "@/lib/tracker";
 import { AppResult, SearchResponse } from "@/lib/types";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 
 export default function NewTrackerPage() {
   const router = useRouter();
@@ -75,20 +78,17 @@ export default function NewTrackerPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+      <main className="min-h-[calc(100vh-3rem)]">
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <Link
-            href="/tracker"
-            className="inline-flex items-center gap-1 mb-6 text-sm font-medium hover:underline underline-offset-2"
-          >
-            ← Back to tracker
+          <Link href="/tracker" className={buttonVariants({ variant: "link", className: "mb-6 -ml-3 gap-1" })}>
+              <ArrowLeft className="h-4 w-4" /> Back to tracker
           </Link>
 
-          <h1 className="text-2xl font-black mb-6 uppercase">Add App to Track</h1>
+          <h1 className="text-2xl font-bold mb-6">Add App to Track</h1>
 
           {!selectedApp ? (
             <>
-              <p className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wider">
+              <p className="text-sm text-muted-foreground mb-4">
                 Search for an app to track its keyword rankings
               </p>
               <div className="flex items-center gap-3 mb-6">
@@ -96,14 +96,14 @@ export default function NewTrackerPage() {
               </div>
 
               {error && (
-                <div className="mb-4 p-3 border-2 border-black bg-black text-white text-sm font-bold">
-                  {error}
-                </div>
+                <Card className="mb-4 p-3 bg-destructive text-destructive-foreground">
+                  <p className="text-sm font-medium">{error}</p>
+                </Card>
               )}
 
               {searchData && (
                 <div className="space-y-3">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">
                     Select an app:
                   </p>
                   {searchData.results.slice(0, 10).map((app, i) => (
@@ -123,60 +123,58 @@ export default function NewTrackerPage() {
             </>
           ) : (
             <div className="space-y-6">
-              <div className="flex items-center gap-4 p-4 border-2 border-black bg-black text-white">
+              <Card className="flex-row items-center gap-4 p-4 bg-primary text-primary-foreground">
                 <Image
                   src={selectedApp.artworkUrl100}
                   alt={selectedApp.trackName}
                   width={48}
                   height={48}
-                  className="border-2 border-white"
+                  className="rounded border"
                 />
                 <div>
-                  <p className="font-bold">{selectedApp.trackName}</p>
-                  <p className="text-sm text-gray-300">{selectedApp.sellerName}</p>
+                  <p className="font-semibold">{selectedApp.trackName}</p>
+                  <p className="text-sm text-primary-foreground/70">{selectedApp.sellerName}</p>
                 </div>
-                <button
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={() => setSelectedApp(null)}
-                  className="ml-auto text-sm font-bold underline underline-offset-2"
+                  className="ml-auto text-primary-foreground/80 hover:text-primary-foreground"
                 >
                   Change
-                </button>
-              </div>
+                </Button>
+              </Card>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Keywords to track
                 </label>
-                <textarea
+                <Textarea
                   value={keywordsText}
                   onChange={(e) => setKeywordsText(e.target.value)}
-                  placeholder={"Enter keywords separated by commas or new lines\n\ne.g.\nfitness tracker, workout log, gym app"}
+                  placeholder="Enter keywords separated by commas or new lines&#10;&#10;e.g.&#10;fitness tracker, workout log, gym app"
                   rows={4}
-                  className="w-full px-3 py-2.5 bg-white border-2 border-black text-sm font-medium focus:outline-none placeholder:text-gray-300"
                 />
-                <p className="text-xs font-medium text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   One check = one API call per keyword
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <label className="text-xs font-bold uppercase tracking-wider">Country:</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Country:</label>
                 <CountrySelector value={country} onChange={setCountry} />
               </div>
 
               {error && (
-                <div className="p-3 border-2 border-black bg-black text-white text-sm font-bold">
-                  {error}
-                </div>
+                <Card className="p-3 bg-destructive text-destructive-foreground">
+                  <p className="text-sm font-medium">{error}</p>
+                </Card>
               )}
 
-              <button
-                onClick={handleStartTracking}
-                className="flex items-center gap-2 px-6 py-2.5 bg-black text-white border-2 border-black text-sm font-bold hover:bg-white hover:text-black transition-colors"
-              >
+              <Button onClick={handleStartTracking} className="gap-1">
                 <Check className="h-4 w-4" />
-                START TRACKING
-              </button>
+                Start Tracking
+              </Button>
             </div>
           )}
         </div>

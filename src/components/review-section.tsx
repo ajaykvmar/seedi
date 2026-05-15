@@ -2,6 +2,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
 import { type ReviewSummary } from "@/lib/reviews";
 
 interface ReviewSectionProps {
@@ -33,10 +38,10 @@ export function ReviewSection({ trackId }: ReviewSectionProps) {
   if (loading) {
     return (
       <section className="mb-8">
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
+        <h2 className="text-sm font-semibold mb-4 border-b pb-2">
           Ratings &amp; Reviews
         </h2>
-        <div className="text-sm font-bold text-gray-300">LOADING REVIEWS...</div>
+        <Skeleton className="h-32 w-full" />
       </section>
     );
   }
@@ -49,24 +54,29 @@ export function ReviewSection({ trackId }: ReviewSectionProps) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-sm font-bold uppercase tracking-widest mb-4 border-b-2 border-black pb-2">
+      <h2 className="text-sm font-semibold mb-4 border-b pb-2">
         Ratings &amp; Reviews
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Rating summary */}
-        <div className="border-2 border-black p-5">
+        <Card className="p-5">
           <div className="flex items-center gap-4 mb-4">
-            <span className="text-5xl font-black tabular-nums">{data.averageRating}</span>
+            <span className="text-5xl font-bold tabular-nums">{data.averageRating}</span>
             <div>
-              <div className="flex gap-0.5 text-lg">
+              <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className={star <= Math.round(data.averageRating) ? "" : "opacity-20"}>
-                    ★
-                  </span>
+                  <Star
+                    key={star}
+                    className={`h-5 w-5 ${
+                      star <= Math.round(data.averageRating)
+                        ? "fill-primary text-primary"
+                        : "text-muted-foreground/30"
+                    }`}
+                  />
                 ))}
               </div>
-              <span className="text-sm font-medium text-gray-400">{data.totalReviews} reviews</span>
+              <span className="text-sm text-muted-foreground">{data.totalReviews} reviews</span>
             </div>
           </div>
 
@@ -75,75 +85,106 @@ export function ReviewSection({ trackId }: ReviewSectionProps) {
               const pct = maxDist > 0 ? (data.distribution[star] / maxDist) * 100 : 0;
               return (
                 <div key={star} className="flex items-center gap-2 text-sm">
-                  <span className="w-6 text-right font-bold tabular-nums">{star}</span>
-                  <div className="flex-1 h-3 bg-gray-100 border border-black">
+                  <span className="w-6 text-right font-bold tabular-nums text-muted-foreground">{star}</span>
+                  <div className="flex-1 h-3 rounded-sm bg-muted">
                     <div
-                      className="h-full bg-black transition-all"
+                      className="h-full rounded-sm bg-primary transition-all"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="w-6 text-right text-xs font-medium text-gray-400 tabular-nums">
+                  <span className="w-6 text-right text-xs text-muted-foreground tabular-nums">
                     {data.distribution[star]}
                   </span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Card>
 
-        {/* Top words */}
-        <div className="border-2 border-black p-5">
-          <h3 className="text-xs font-bold uppercase tracking-widest mb-3">Common Words</h3>
-          <div className="flex flex-wrap gap-2">
-            {data.topWords.slice(0, 20).map((w) => (
-              <span
-                key={w.word}
-                className="px-2.5 py-1 border-2 border-black text-xs font-bold"
-              >
-                {w.word}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* Topic clusters */}
+        <Card className="p-5">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Topics
+          </h3>
+          {data.topics && data.topics.length > 0 ? (
+            <div className="space-y-2">
+              {data.topics.map((t) => (
+                <div key={t.topic} className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1.5">
+                    <span>{t.icon}</span>
+                    <span className="capitalize font-medium">{t.topic === "missingFeature" ? "Missing Feature" : t.topic}</span>
+                    {t.sampleReviews.length > 0 && (
+                      <span className="text-xs text-muted-foreground ml-1">
+                        — {t.sampleReviews[0].title.slice(0, 40)}
+                      </span>
+                    )}
+                  </span>
+                  <Badge variant="secondary" className="tabular-nums text-xs">
+                    {t.count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {(!data.topics || data.topics.length === 0) && data.topWords.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {data.topWords.slice(0, 20).map((w) => (
+                <Badge key={w.word} variant="secondary">
+                  {w.word}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {(!data.topics || data.topics.length === 0) && data.topWords.length === 0 && (
+            <p className="text-xs text-muted-foreground">Not enough reviews to classify</p>
+          )}
+        </Card>
       </div>
 
       {/* Recent reviews */}
       {data.recentReviews.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest mb-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             Recent Reviews
             {data.recentReviews.length > 5 && (
-              <button
+              <Button
+                variant="link"
+                size="sm"
                 onClick={() => setExpanded(!expanded)}
-                className="ml-2 underline underline-offset-2 font-bold normal-case"
+                className="ml-2"
               >
                 {expanded ? "Show less" : `Show all ${data.recentReviews.length}`}
-              </button>
+              </Button>
             )}
           </h3>
           <div className="space-y-3">
             {(expanded ? data.recentReviews : data.recentReviews.slice(0, 5)).map((review) => (
-              <div key={review.id} className="border-2 border-black p-4">
+              <Card key={review.id} className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex gap-0.5 text-sm">
+                    <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className={star <= review.rating ? "" : "opacity-20"}>
-                          ★
-                        </span>
+                        <Star
+                          key={star}
+                          className={`h-3.5 w-3.5 ${
+                            star <= review.rating
+                              ? "fill-primary text-primary"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
                       ))}
                     </div>
-                    <span className="text-sm font-bold">{review.title}</span>
+                    <span className="text-sm font-medium">{review.title}</span>
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(review.updated).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="text-sm font-medium leading-relaxed line-clamp-3">{review.content}</p>
+                <p className="text-sm leading-relaxed line-clamp-3 text-muted-foreground">{review.content}</p>
                 {review.version && (
-                  <p className="text-xs text-gray-400 mt-1 font-mono">v{review.version}</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1 font-mono">v{review.version}</p>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>

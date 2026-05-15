@@ -2,6 +2,9 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -40,22 +43,25 @@ export function SearchBar({
 
   return (
     <div className="relative w-full max-w-2xl">
-      <form onSubmit={handleSubmit}>
-        <div className="relative border-2 border-black">
-          <input
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search apps and keywords..."
-            className="w-full px-3 py-2.5 pr-10 bg-white text-black placeholder:text-gray-300 text-sm font-medium focus:outline-none"
+            placeholder="Search apps and keywords... (⌘K)"
+            className="pr-10"
           />
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="h-4 w-4 border-2 border-black border-t-transparent animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           )}
         </div>
+        <Button type="submit" size="icon" disabled={query.trim().length < 2 || loading}>
+          <Search className="h-4 w-4" />
+        </Button>
       </form>
     </div>
   );

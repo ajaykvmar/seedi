@@ -3,6 +3,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { TrackedApp } from "@/lib/tracker";
 import { RankHistoryChart } from "@/components/rank-history-chart";
 import { Package, Trash2, RefreshCw } from "lucide-react";
@@ -14,13 +17,6 @@ interface TrackedAppCardProps {
   onRemoveKeyword: (appId: string, keywordIndex: number) => void;
   onCheckKeyword: (appId: string, keywordIndex: number) => void;
   onCheckAll: (appId: string) => void;
-}
-
-function rankColor(rank: number | null): string {
-  if (rank === null) return "text-gray-300";
-  if (rank <= 5) return "bg-black text-white";
-  if (rank <= 15) return "border-2 border-black";
-  return "text-gray-300 border-2 border-gray-200";
 }
 
 function trendSymbol(history: { rank: number | null }[]): string {
@@ -55,7 +51,7 @@ export function TrackedAppCard({
   );
 
   return (
-    <div className="bg-white border-2 border-black p-5">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <Link
           href={`/app/${app.trackId}`}
@@ -66,18 +62,18 @@ export function TrackedAppCard({
             alt={app.trackName}
             width={40}
             height={40}
-            className="border-2 border-black"
+            className="rounded border"
           />
           <div>
-            <h3 className="font-bold">{app.trackName}</h3>
-            <p className="text-xs font-medium text-gray-400">
+            <h3 className="font-semibold">{app.trackName}</h3>
+            <p className="text-xs text-muted-foreground">
               {app.keywords.length} keyword{app.keywords.length !== 1 ? "s" : ""} tracked
             </p>
             {app.version && (
-              <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                 <Package className="h-3 w-3" /> v{app.version}
                 {app.lastVersionCheck && (
-                  <span className="text-gray-300">· checked {formatDate(app.lastVersionCheck)}</span>
+                  <span className="text-muted-foreground/50">· checked {formatDate(app.lastVersionCheck)}</span>
                 )}
               </p>
             )}
@@ -85,28 +81,30 @@ export function TrackedAppCard({
         </Link>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onCheckAll(app.id)}
             disabled={isCheckingAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-black hover:bg-black hover:text-white transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isCheckingAll ? "animate-spin" : ""}`} />
-            {isCheckingAll ? "CHECKING..." : "CHECK ALL"}
-          </button>
-          <button
+            <RefreshCw className={`h-3.5 w-3.5 mr-1 ${isCheckingAll ? "animate-spin" : ""}`} />
+            {isCheckingAll ? "Checking..." : "Check All"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onRemoveApp(app.id)}
-            className="p-1.5 text-gray-300 hover:text-black transition-colors"
             aria-label="Remove app"
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="text-left text-xs font-bold uppercase tracking-wider border-b-2 border-black">
+            <tr className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b">
               <th className="pb-2 pr-3">Keyword</th>
               <th className="pb-2 pr-3">Country</th>
               <th className="pb-2 pr-3">Rank</th>
@@ -121,16 +119,16 @@ export function TrackedAppCard({
               const last = kw.history[kw.history.length - 1];
               const isChecking = checking.has(`${app.id}:${i}`);
               return (
-                <tr key={`${kw.keyword}-${kw.country}-${i}`} className="border-t border-gray-200">
-                  <td className="py-2.5 pr-3 font-bold">{kw.keyword}</td>
+                <tr key={`${kw.keyword}-${kw.country}-${i}`} className="border-t border-border">
+                  <td className="py-2.5 pr-3 font-medium">{kw.keyword}</td>
                   <td className="py-2.5 pr-3 uppercase text-xs">{kw.country}</td>
                   <td className="py-2.5 pr-3">
                     {last ? (
-                      <span className={`inline-block px-2 py-0.5 text-xs font-bold tabular-nums ${rankColor(last.rank)}`}>
+                      <Badge variant={last.rank && last.rank <= 5 ? "default" : last.rank && last.rank <= 15 ? "secondary" : "outline"}>
                         {last.rank ? `#${last.rank}` : "—"}
-                      </span>
+                      </Badge>
                     ) : (
-                      <span className="text-gray-200">—</span>
+                      <span className="text-muted-foreground/30">—</span>
                     )}
                   </td>
                   <td className="py-2.5 pr-3 text-sm font-bold">
@@ -139,25 +137,27 @@ export function TrackedAppCard({
                   <td className="py-2.5 pr-3">
                     <RankHistoryChart history={kw.history} />
                   </td>
-                  <td className="py-2.5 pr-3 text-xs text-gray-400 font-medium">
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground">
                     {last ? formatDate(last.date) : "never"}
                   </td>
                   <td className="py-2.5 flex items-center gap-1">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onCheckKeyword(app.id, i)}
                       disabled={isChecking}
-                      className="p-1.5 text-gray-300 hover:text-black transition-colors disabled:opacity-50"
                       aria-label={`Check rank for ${kw.keyword}`}
                     >
                       <RefreshCw className={`h-3.5 w-3.5 ${isChecking ? "animate-spin" : ""}`} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onRemoveKeyword(app.id, i)}
-                      className="p-1.5 text-gray-300 hover:text-black transition-colors"
                       aria-label={`Remove keyword ${kw.keyword}`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               );
@@ -165,6 +165,6 @@ export function TrackedAppCard({
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

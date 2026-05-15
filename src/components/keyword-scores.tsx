@@ -1,6 +1,7 @@
 // src/components/keyword-scores.tsx
 "use client";
 
+import { Card } from "@/components/ui/card";
 import { KeywordScores as KeywordScoresType } from "@/lib/types";
 
 interface ScoreBadgeProps {
@@ -11,10 +12,10 @@ interface ScoreBadgeProps {
 
 function ScoreBadge({ label, value, high }: ScoreBadgeProps) {
   return (
-    <div className={`border-2 p-3 ${high ? "bg-black text-white border-black" : "border-black"}`}>
+    <Card className={`p-3 text-center ${high ? "bg-primary text-primary-foreground" : ""}`}>
       <span className="text-2xl font-bold tabular-nums block">{value}</span>
-      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
-    </div>
+      <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
+    </Card>
   );
 }
 

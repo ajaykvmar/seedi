@@ -12,12 +12,101 @@ export interface Review {
   updated: string;
 }
 
+export interface TopicCluster {
+  topic: string;
+  icon: string;
+  count: number;
+  sentiment: "positive" | "negative" | "mixed";
+  sampleReviews: { title: string; rating: number }[];
+}
+
 export interface ReviewSummary {
   averageRating: number;
   totalReviews: number;
   distribution: { [stars: number]: number };
   topWords: { word: string; count: number }[];
   recentReviews: Review[];
+  topics?: TopicCluster[];
+}
+
+const TOPIC_PATTERNS: Record<string, { keywords: string[]; icon: string; sentiment: "positive" | "negative" | "mixed" }> = {
+  crash: {
+    keywords: ["crash", "crashes", "crashed", "crashing", "freeze", "freezes", "frozen", "bug", "glitch", "broken", "unstable", "not working", "doesn't work", "won't open", "keeps closing"],
+    icon: "⚠️",
+    sentiment: "negative",
+  },
+  performance: {
+    keywords: ["slow", "lag", "lags", "laggy", "loading", "battery drain", "drains battery", "memory", "storage", "heavy", "stutter"],
+    icon: "🐌",
+    sentiment: "negative",
+  },
+  pricing: {
+    keywords: ["subscription", "price", "pricing", "expensive", "too expensive", "overpriced", "cost", "pay", "paid", "premium", "subscription", "trial", "free trial", "auto renew", "cancel", "refund", "money", "worth", "value", "bait and switch", "hidden"],
+    icon: "💰",
+    sentiment: "negative",
+  },
+  ui: {
+    keywords: ["interface", "ui", "ux", "design", "ugly", "layout", "confusing", "cluttered", "hard to use", "navigation", "menu", "button", "scroll", "responsive", "dark mode", "accessibility", "font", "color"],
+    icon: "🎨",
+    sentiment: "mixed",
+  },
+  missingFeature: {
+    keywords: ["wish", "wished", "missing", "add", "please add", "would be great", "need", "needs", "feature request", "suggestion", "ability to", "option to", "support for", "integrate", "integration", "sync", "widget", "apple watch", "widget", "shortcut"],
+    icon: "💡",
+    sentiment: "mixed",
+  },
+  ads: {
+    keywords: ["ads", "ad", "advertisement", "commercial", "spam", "notification spam", "too many ads", "annoying ads", "pop up", "popup"],
+    icon: "📢",
+    sentiment: "negative",
+  },
+  customerSupport: {
+    keywords: ["support", "customer service", "help", "response", "reply", "contact", "email", "no response", "ignored", "unresponsive", "refund"],
+    icon: "🎧",
+    sentiment: "negative",
+  },
+  update: {
+    keywords: ["update", "new version", "latest", "recent update", "old version", "downgrade", "used to", "before update", "after update", "ruined", "worse", "broke"],
+    icon: "🔄",
+    sentiment: "mixed",
+  },
+  privacy: {
+    keywords: ["privacy", "data", "track", "tracking", "collect", "collects", "personal", "location", "permission", "access", "camera", "microphone", "contacts", "photos"],
+    icon: "🔒",
+    sentiment: "negative",
+  },
+};
+
+export function classifyReviewTopics(reviews: Review[]): TopicCluster[] {
+  const topicHits = new Map<string, { count: number; reviews: { title: string; rating: number }[] }>();
+
+  for (const review of reviews) {
+    const text = (review.title + " " + review.content).toLowerCase();
+    for (const [topic, config] of Object.entries(TOPIC_PATTERNS)) {
+      const matched = config.keywords.some((kw) => text.includes(kw));
+      if (matched) {
+        if (!topicHits.has(topic)) {
+          topicHits.set(topic, { count: 0, reviews: [] });
+        }
+        const entry = topicHits.get(topic)!;
+        entry.count++;
+        if (entry.reviews.length < 3) {
+          entry.reviews.push({ title: review.title, rating: review.rating });
+        }
+      }
+    }
+  }
+
+  return Array.from(topicHits.entries())
+    .map(([topic, data]) => ({
+      topic,
+      icon: TOPIC_PATTERNS[topic].icon,
+      count: data.count,
+      sentiment: TOPIC_PATTERNS[topic].sentiment,
+      sampleReviews: data.reviews,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
 }
 
 const parser = new XMLParser({
@@ -153,11 +242,14 @@ export async function getReviews(
     .slice(0, 30)
     .map(([word, count]) => ({ word, count }));
 
+  const topics = classifyReviewTopics(allReviews);
+
   return {
     averageRating: Math.round(averageRating * 10) / 10,
     totalReviews,
     distribution,
     topWords,
+    topics,
     recentReviews: allReviews
       .sort(
         (a, b) =>

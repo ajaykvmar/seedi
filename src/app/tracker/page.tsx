@@ -5,8 +5,11 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { TrackedAppCard } from "@/components/tracked-app-card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTracker } from "@/lib/tracker";
-import { Plus } from "lucide-react";
+import { Plus, BarChart3 } from "lucide-react";
 
 export default function TrackerPage() {
   const {
@@ -56,7 +59,14 @@ export default function TrackerPage() {
     return (
       <>
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-12 text-center font-bold">LOADING...</div>
+        <div className="max-w-5xl mx-auto px-4 py-12">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="space-y-4">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full" />
+            ))}
+          </div>
+        </div>
       </>
     );
   }
@@ -64,35 +74,29 @@ export default function TrackerPage() {
   return (
     <>
       <Header />
-      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+      <main className="min-h-[calc(100vh-3rem)]">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-black uppercase">Rank Tracker</h1>
-              <p className="text-sm font-medium text-gray-400 mt-1 uppercase tracking-wider">
+              <h1 className="text-2xl font-bold">Rank Tracker</h1>
+              <p className="text-sm text-muted-foreground mt-1">
                 Track keyword rankings over time
               </p>
             </div>
-            <Link
-              href="/tracker/new"
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white border-2 border-black text-sm font-bold hover:bg-white hover:text-black transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              ADD APP
+            <Link href="/tracker/new" className={buttonVariants({ className: "gap-1" })}>
+                <Plus className="h-4 w-4" />
+                Add App
             </Link>
           </div>
 
           {trackedApps.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-6xl font-black text-gray-100 mb-3">[]</p>
-              <p className="text-lg font-bold text-gray-300">No apps tracked</p>
-              <p className="text-sm mt-1 mb-6 text-gray-200">Track keyword rankings for your apps</p>
-              <Link
-                href="/tracker/new"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white border-2 border-black text-sm font-bold hover:bg-white hover:text-black transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                ADD YOUR FIRST APP
+              <BarChart3 className="h-16 w-16 mx-auto mb-3 text-muted-foreground/20" />
+              <p className="text-lg font-medium text-muted-foreground">No apps tracked</p>
+              <p className="text-sm mt-1 mb-6 text-muted-foreground/50">Track keyword rankings for your apps</p>
+              <Link href="/tracker/new" className={buttonVariants({ className: "gap-1" })}>
+                  <Plus className="h-4 w-4" />
+                  Add Your First App
               </Link>
             </div>
           ) : (

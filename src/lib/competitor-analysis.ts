@@ -1,31 +1,11 @@
 // src/lib/competitor-analysis.ts
 import { AppResult } from "./types";
-
-const SEED_KEYWORDS = [
-  "fitness", "workout", "health", "tracker", "meditation", "yoga",
-  "running", "nutrition", "diet", "exercise", "gym", "wellness",
-  "sleep", "mindfulness", "weight", "calories", "steps", "heart",
-  "training", "coach", "planner", "habit", "journal", "mood",
-  "social", "photo", "editor", "video", "music", "game",
-  "productivity", "notes", "calendar", "tasks", "finance", "budget",
-];
+import { extractKeywordsFromTexts } from "./keyword-extraction";
 
 export function findCategoryKeywords(apps: AppResult[]): string[] {
-  const keywords = new Set<string>();
-
-  for (const app of apps) {
-    for (const genre of app.genres) {
-      keywords.add(genre.toLowerCase());
-    }
-    const nameWords = app.trackName.toLowerCase().split(/\s+/);
-    for (const word of nameWords) {
-      if (SEED_KEYWORDS.includes(word)) {
-        keywords.add(word);
-      }
-    }
-  }
-
-  return [...keywords];
+  // Extract keywords from app titles only — they carry the most keyword weight
+  const texts: string[] = apps.map((app) => app.trackName);
+  return extractKeywordsFromTexts(texts);
 }
 
 export interface OverlapResult {
