@@ -30,10 +30,34 @@ const REVIEW_URL =
 
 function parseReviewEntry(entry: any): Review | null {
   if (!entry || !entry.id) return null;
+
+  // content can be a string, object ({#text, @_type}), or array of such objects
+  const rawContent = entry.content;
+  let contentText = "";
+  if (typeof rawContent === "string") {
+    contentText = rawContent;
+  } else if (Array.isArray(rawContent)) {
+    const textPart = rawContent.find(
+      (c: any) => c?.["@_type"] === "text"
+    );
+    contentText = textPart?.["#text"] ?? rawContent[0]?.["#text"] ?? "";
+  } else if (rawContent && typeof rawContent === "object") {
+    contentText = rawContent["#text"] ?? "";
+  }
+
+  // title can also be an object with #text
+  const rawTitle = entry.title;
+  let titleText = "";
+  if (typeof rawTitle === "string") {
+    titleText = rawTitle;
+  } else if (rawTitle && typeof rawTitle === "object") {
+    titleText = rawTitle["#text"] ?? "";
+  }
+
   return {
     id: String(entry.id),
-    title: entry.title || "",
-    content: entry.content?.["#text"] || entry.content || "",
+    title: titleText,
+    content: contentText,
     rating: parseInt(entry["im:rating"] ?? "0", 10),
     voteSum: parseInt(entry["im:voteSum"] ?? "0", 10),
     voteCount: parseInt(entry["im:voteCount"] ?? "0", 10),
