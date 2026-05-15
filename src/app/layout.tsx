@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "ASO Analyzer — App Store Keyword Research",
-    template: "%s | ASO Analyzer",
+    default: "SEEDI — ASO Tool",
+    template: "%s | SEEDI",
   },
   description:
     "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities in the App Store.",
@@ -20,16 +17,16 @@ export const metadata: Metadata = {
     "competitor analysis",
   ],
   openGraph: {
-    title: "ASO Analyzer — App Store Keyword Research",
+    title: "SEEDI — ASO Tool",
     description:
       "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities.",
-    url: "https://aso-analyzer.pages.dev",
-    siteName: "ASO Analyzer",
+    url: "https://seedi.pages.dev",
+    siteName: "SEEDI",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ASO Analyzer — App Store Keyword Research",
+    title: "SEEDI — ASO Tool",
     description:
       "Free ASO tool for iOS developers. Research keywords, track competitors, and find keyword opportunities.",
   },
@@ -46,7 +43,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
+      <body className="bg-white text-black">
         {children}
       </body>
     </html>

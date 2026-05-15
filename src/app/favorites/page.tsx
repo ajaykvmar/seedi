@@ -7,7 +7,6 @@ import { Header } from "@/components/header";
 import { AppCard } from "@/components/app-card";
 import { useFavorites } from "@/lib/favorites";
 import { AppResult } from "@/lib/types";
-import { ChevronLeft, Heart } from "lucide-react";
 
 export default function FavoritesPage() {
   const { favorites, isFavorite, toggleFavorite, hydrated } = useFavorites();
@@ -43,7 +42,7 @@ export default function FavoritesPage() {
     return (
       <>
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-12 text-center text-gray-500">Loading...</div>
+        <div className="max-w-3xl mx-auto px-4 py-12 text-center font-bold">LOADING...</div>
       </>
     );
   }
@@ -51,32 +50,34 @@ export default function FavoritesPage() {
   return (
     <>
       <Header />
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-1 mb-6 text-sm text-gray-500 hover:text-gray-900">
-          <ChevronLeft className="h-4 w-4" /> Back to search
-        </Link>
+      <main className="min-h-[calc(100vh-3rem)] border-t-2 border-black">
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <Link href="/" className="inline-flex items-center gap-1 mb-6 text-sm font-medium hover:underline underline-offset-2">
+            ← Back to search
+          </Link>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Favorites</h1>
+          <h1 className="text-2xl font-black mb-6 uppercase">Favorites</h1>
 
-        {apps.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <Heart className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-lg">No favorites yet</p>
-            <p className="text-sm mt-1">Heart an app in search results to save it here</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {apps.map((app, i) => (
-              <AppCard
-                key={app.trackId}
-                app={app}
-                rank={i + 1}
-                isFavorite={isFavorite(app.trackId)}
-                onToggleFavorite={() => toggleFavorite(app.trackId)}
-              />
-            ))}
-          </div>
-        )}
+          {apps.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-6xl font-black text-gray-100 mb-3">♥</p>
+              <p className="text-lg font-bold text-gray-300">No favorites yet</p>
+              <p className="text-sm mt-1 text-gray-200">Save apps from search results</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {apps.map((app, i) => (
+                <AppCard
+                  key={app.trackId}
+                  app={app}
+                  rank={i + 1}
+                  isFavorite={isFavorite(app.trackId)}
+                  onToggleFavorite={() => toggleFavorite(app.trackId)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </>
   );

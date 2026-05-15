@@ -20,11 +20,11 @@ export function SearchResults({
   onToggleFavorite,
 }: SearchResultsProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-sm text-gray-500">
-            Results for <span className="font-semibold text-gray-900">&ldquo;{data.query}&rdquo;</span>
+          <p className="text-sm font-medium">
+            Results for <span className="font-bold">&ldquo;{data.query}&rdquo;</span>
             {" "}· {data.total} apps · {data.country.toUpperCase()} store
           </p>
         </div>

@@ -6,34 +6,21 @@ import { KeywordScores as KeywordScoresType } from "@/lib/types";
 interface ScoreBadgeProps {
   label: string;
   value: number;
-  color: "green" | "yellow" | "red";
+  high: boolean;
 }
 
-function ScoreBadge({ label, value, color }: ScoreBadgeProps) {
-  const colorClasses = {
-    green: "bg-green-50 text-green-700 border-green-200",
-    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    red: "bg-red-50 text-red-700 border-red-200",
-  };
-
+function ScoreBadge({ label, value, high }: ScoreBadgeProps) {
   return (
-    <div className={`flex flex-col items-center p-3 rounded-xl border ${colorClasses[color]}`}>
-      <span className="text-2xl font-bold">{value}</span>
-      <span className="text-xs font-medium mt-0.5">{label}</span>
+    <div className={`border-2 p-3 ${high ? "bg-black text-white border-black" : "border-black"}`}>
+      <span className="text-2xl font-bold tabular-nums block">{value}</span>
+      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
     </div>
   );
 }
 
-function getColor(value: number): "green" | "yellow" | "red" {
-  if (value >= 66) return "green";
-  if (value >= 33) return "yellow";
-  return "red";
-}
-
-function getDifficultyColor(value: number): "green" | "yellow" | "red" {
-  if (value <= 33) return "green";
-  if (value <= 66) return "yellow";
-  return "red";
+function getHigh(value: number, label: string): boolean {
+  if (label === "Difficulty") return value <= 33;
+  return value >= 66;
 }
 
 interface Props {
@@ -42,10 +29,10 @@ interface Props {
 
 export function KeywordScores({ scores }: Props) {
   return (
-    <div className="flex gap-3">
-      <ScoreBadge label="Opportunity" value={scores.opportunity} color={getColor(scores.opportunity)} />
-      <ScoreBadge label="Difficulty" value={scores.difficulty} color={getDifficultyColor(scores.difficulty)} />
-      <ScoreBadge label="Popularity" value={scores.popularity} color={getColor(scores.popularity)} />
+    <div className="flex gap-2">
+      <ScoreBadge label="Opportunity" value={scores.opportunity} high={getHigh(scores.opportunity, "Opportunity")} />
+      <ScoreBadge label="Difficulty" value={scores.difficulty} high={getHigh(scores.difficulty, "Difficulty")} />
+      <ScoreBadge label="Popularity" value={scores.popularity} high={getHigh(scores.popularity, "Popularity")} />
     </div>
   );
 }
