@@ -149,6 +149,23 @@ export default function AppDetailPage() {
           </section>
         )}
 
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">What&rsquo;s New</h2>
+          <div className="bg-gray-50 rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-gray-900">Version {app.version ?? "N/A"}</span>
+              {app.currentVersionReleaseDate && (
+                <span className="text-xs text-gray-400">{new Date(app.currentVersionReleaseDate).toLocaleDateString()}</span>
+              )}
+            </div>
+            {app.releaseNotes ? (
+              <p className="text-sm text-gray-600 whitespace-pre-line">{app.releaseNotes}</p>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No release notes available</p>
+            )}
+          </div>
+        </section>
+
         {app.description && (
           <section className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>

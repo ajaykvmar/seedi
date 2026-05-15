@@ -22,6 +22,9 @@ export interface TrackedApp {
   artworkUrl100: string;
   keywords: TrackedKeyword[];
   createdAt: number;
+  version?: string;
+  lastVersionCheck?: number;
+  versionHistory?: { version: string; date: number }[];
 }
 
 const STORAGE_KEY = "aso-tracker";
@@ -187,6 +190,52 @@ export function useTracker() {
     [trackedApps, checkKeyword]
   );
 
+  const checkVersion = useCallback(
+    async (appId: string): Promise<string | null> => {
+      const app = trackedApps.find((a) => a.id === appId);
+      if (!app) return null;
+
+      try {
+        const res = await fetch(`/api/app-info?id=${app.trackId}`);
+        if (!res.ok) return null;
+        const info = await res.json();
+        const currentVersion: string = info.version ?? "";
+
+        if (!currentVersion) return null;
+
+        let updated = false;
+        persist((prev) =>
+          prev.map((a) => {
+            if (a.id !== appId) return a;
+            const prevVersion = a.version;
+            const history = a.versionHistory ?? [];
+            if (currentVersion !== prevVersion) {
+              updated = true;
+              return {
+                ...a,
+                version: currentVersion,
+                lastVersionCheck: Date.now(),
+                versionHistory: [
+                  ...history,
+                  { version: currentVersion, date: Date.now() },
+                ].slice(-20),
+              };
+            }
+            return {
+              ...a,
+              lastVersionCheck: Date.now(),
+            };
+          })
+        );
+
+        return currentVersion;
+      } catch {
+        return null;
+      }
+    },
+    [trackedApps, persist]
+  );
+
   return {
     trackedApps,
     hydrated,
@@ -196,6 +245,7 @@ export function useTracker() {
     removeKeyword,
     checkKeyword,
     checkAll,
+    checkVersion,
   };
 }
 

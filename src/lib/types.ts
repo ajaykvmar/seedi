@@ -3,6 +3,8 @@ export interface AppResult {
   trackId: number;
   trackName: string;
   description?: string;
+  releaseNotes?: string;
+  currentVersionReleaseDate?: string;
   averageUserRating: number;
   userRatingCount: number;
   releaseDate: string;

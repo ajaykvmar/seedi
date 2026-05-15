@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TrackedApp } from "@/lib/tracker";
 import { RankHistoryChart } from "@/components/rank-history-chart";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, Package } from "lucide-react";
 
 interface TrackedAppCardProps {
   app: TrackedApp;
@@ -73,6 +73,14 @@ export function TrackedAppCard({
             <p className="text-xs text-gray-400">
               {app.keywords.length} keyword{app.keywords.length !== 1 ? "s" : ""} tracked
             </p>
+            {app.version && (
+              <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                <Package className="h-3 w-3" /> v{app.version}
+                {app.lastVersionCheck && (
+                  <span className="text-gray-300">· checked {formatDate(app.lastVersionCheck)}</span>
+                )}
+              </p>
+            )}
           </div>
         </Link>
 

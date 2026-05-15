@@ -71,6 +71,8 @@ function normalize(item: Record<string, unknown>): AppResult {
     trackId: item.trackId as number,
     trackName: (item.trackName as string) ?? "",
     description: item.description as string | undefined,
+    releaseNotes: item.releaseNotes as string | undefined,
+    currentVersionReleaseDate: item.currentVersionReleaseDate as string | undefined,
     averageUserRating: (item.averageUserRating as number) ?? 0,
     userRatingCount: (item.userRatingCount as number) ?? 0,
     releaseDate: item.releaseDate as string,

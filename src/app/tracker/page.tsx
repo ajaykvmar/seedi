@@ -16,6 +16,7 @@ export default function TrackerPage() {
     removeKeyword,
     checkKeyword,
     checkAll,
+    checkVersion,
   } = useTracker();
 
   const [checking, setChecking] = useState<Set<string>>(new Set());
@@ -41,6 +42,7 @@ export default function TrackerPage() {
       const keys = app.keywords.map((_, i) => `${appId}:${i}`);
       setChecking((prev) => new Set([...prev, ...keys]));
       await checkAll(appId);
+      await checkVersion(appId);
       setChecking((prev) => {
         const next = new Set(prev);
         keys.forEach((k) => next.delete(k));
