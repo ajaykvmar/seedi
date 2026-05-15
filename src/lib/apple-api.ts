@@ -26,7 +26,9 @@ export async function searchApps(
 
   if (!res.ok) throw new Error(`iTunes API error: ${res.status}`);
   const data: ItunesSearchResponse = await res.json();
-  return data.results.map(normalize);
+  return data.results
+    .filter((item) => (item.wrapperType as string) === "software")
+    .map(normalize);
 }
 
 export async function lookupApp(
@@ -63,7 +65,9 @@ export async function lookupDeveloper(
 
   if (!res.ok) throw new Error(`iTunes API error: ${res.status}`);
   const data: ItunesSearchResponse = await res.json();
-  return data.results.map(normalize);
+  return data.results
+    .filter((item) => (item.wrapperType as string) === "software")
+    .map(normalize);
 }
 
 function normalize(item: Record<string, unknown>): AppResult {
