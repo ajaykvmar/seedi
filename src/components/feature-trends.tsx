@@ -21,11 +21,11 @@ interface FeaturesResponse {
   query: string;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  feature: "bg-blue-100 text-blue-800",
-  improvement: "bg-green-100 text-green-800",
-  integration: "bg-purple-100 text-purple-800",
-  platform: "bg-amber-100 text-amber-800",
+const CATEGORY_STYLES: Record<string, string> = {
+  feature: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  improvement: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  integration: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  platform: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
 };
 
 export function FeatureTrends() {
@@ -82,29 +82,44 @@ export function FeatureTrends() {
       {data && !loading && (
         <>
           <p className="text-xs text-muted-foreground mb-4">
-            Feature mentions extracted from release notes of top {data.sourceCount} apps for &ldquo;{data.query}&rdquo;
+            Named features extracted from release notes of top {data.sourceCount} apps for &ldquo;{data.query}&rdquo;
+            &mdash; only features mentioned by 2+ apps are shown
           </p>
           <div className="space-y-2">
             {data.features.map((f, i) => (
-              <Card key={i} className="p-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-medium truncate">{f.keyword}</span>
-                  <Badge className={CATEGORY_COLORS[f.category] || "bg-gray-100 text-gray-700"}>
-                    {f.category}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">
+              <Card key={i} className="p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-sm font-medium truncate">{f.keyword}</span>
+                    <Badge className={`${CATEGORY_STYLES[f.category] || "bg-gray-100 text-gray-700"} text-[10px] px-1.5 py-0 h-4`}>
+                      {f.category}
+                    </Badge>
+                  </div>
+                  <span
+                    className="text-xs text-muted-foreground whitespace-nowrap shrink-0"
+                    title={f.apps.join(", ")}
+                  >
                     {f.count} app{f.count !== 1 ? "s" : ""}
+                    {f.apps.length > 0 && (
+                      <span className="text-muted-foreground/50 ml-1">
+                        &mdash; {f.apps[0].slice(0, 18)}{f.apps.length > 1 ? " +" : ""}
+                      </span>
+                    )}
                   </span>
                 </div>
               </Card>
             ))}
           </div>
           {data.features.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No common feature patterns found in release notes
-            </p>
+            <div className="text-center py-12 space-y-2">
+              <p className="text-sm text-muted-foreground">
+                No shared feature names found across these apps
+              </p>
+              <p className="text-xs text-muted-foreground/60">
+                Most release notes only contain generic maintenance phrases (&ldquo;bug fixes&rdquo;)
+                which are filtered out. Try a more specific keyword category.
+              </p>
+            </div>
           )}
         </>
       )}

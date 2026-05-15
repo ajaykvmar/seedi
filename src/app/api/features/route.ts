@@ -1,13 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchApps } from "@/lib/apple-api";
 
-const FEATURE_STOP_WORDS = new Set([
-  "the", "a", "an", "and", "or", "for", "with", "new", "added", "fixed",
-  "improved", "updated", "bug", "fixes", "bugs", "performance", "stability",
-  "enhancements", "better", "now", "get", "got", "make", "made", "various",
-  "minor", "major", "general", "other", "more", "some", "all", "several",
-  "include", "includes", "including", "support", "supports", "supported",
+// Phrases that sound like features but are just generic maintenance boilerplate
+const GENERIC_FEATURES = new Set([
+  "bug fixes", "bug fix", "bugfix", "bugfixes",
+  "performance improvements", "performance improvement", "performance fixes",
+  "stability improvements", "stability improvement", "stability fixes",
+  "minor fixes", "minor bug fixes", "minor improvements",
+  "general improvements", "general bug fixes", "general fixes",
+  "various improvements", "various fixes", "various bug fixes",
+  "ui improvements", "ux improvements", "ui fixes",
+  "under the hood improvements", "under the hood fixes",
+  "enhancements", "minor enhancements",
+  "improvements and bug fixes", "bug fixes and improvements",
+  "critical fixes", "hotfix", "hot fixes",
 ]);
+
+// Context patterns that introduce real feature names
+// These capture the feature name that follows
+const FEATURE_PATTERNS = [
+  // "Added X" / "Add X" / "Introducing X"
+  /(?:added|add|introducing|introduces|introduce|launching|launches|launched|now with|now featuring|featuring|welcome|includes|include)\s+([A-Z][a-zA-Z0-9]+(?:\s+[A-Za-z][a-zA-Z0-9]+){1,5})/g,
+  // "New X" (where X is 2+ words, capitalized)
+  /new\s+([A-Z][a-z]+(?:\s+[A-Za-z][a-z]+){1,5})/g,
+  // "X support" / "X integration"
+  /([A-Z][a-zA-Z0-9]+(?:\s+[A-Za-z][a-zA-Z0-9]+){1,4})\s+(?:support|integration|compatibility)/g,
+  // "Support for X" / "Integration with X"
+  /(?:support|integration)\s+(?:for|with)\s+([A-Z][a-zA-Z0-9]+(?:\s+[A-Za-z][a-zA-Z0-9]+){1,4})/g,
+  // Standalone capitalized multi-word names (2-4 words) that look like product/feature names
+  /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/g,
+];
+
+// Word-level stop list for cleaning (lowercase)
+const STOP_WORDS = new Set([
+  "the", "a", "an", "and", "or", "for", "with", "this", "that", "from",
+  "our", "your", "its", "all", "new", "now", "get", "got", "can",
+]);
+
+// Non-feature section headers commonly found in release notes
+const SKIP_SECTIONS = [
+  /what'?s new/i,
+  /what'?s changed/i,
+  /release notes/i,
+  /version \d/i,
+  /overview/i,
+  /description/i,
+];
 
 interface FeatureMention {
   keyword: string;
@@ -26,7 +64,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch top apps in this keyword space
     const results = await searchApps(query.trim(), country, 25);
     const topAppsWithNotes = results
       .filter((a) => a.releaseNotes && a.releaseNotes.length > 10)
@@ -36,61 +73,75 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ features: [], total: 0 });
     }
 
-    // Extract feature mentions from release notes
+    // Extract real feature names from release notes using patterns
     const featureCounts = new Map<string, { count: number; apps: string[] }>();
 
     for (const app of topAppsWithNotes) {
-      const notes = app.releaseNotes!.toLowerCase();
-      // Split by common delimiters: bullet points, periods, newlines, commas
-      const segments = notes
-        .split(/[•·\-–—\n\r]+/)
-        .flatMap((s) => s.split(/\.\s+/))
-        .map((s) => s.trim())
-        .filter((s) => s.length > 8 && s.length < 120);
-
-      // Extract 2-3 word phrases from each segment
+      const notes = app.releaseNotes!;
       const seen = new Set<string>();
-      for (const segment of segments) {
-        const words = segment
-          .replace(/[^a-z0-9\s]/g, "")
-          .split(/\s+/)
-          .filter((w) => w.length >= 3 && !FEATURE_STOP_WORDS.has(w));
 
-        // Extract bigrams and trigrams
-        const phrases: string[] = [];
-        for (let i = 0; i < words.length - 1; i++) {
-          if (words[i].length >= 3 && words[i + 1].length >= 3) {
-            phrases.push(`${words[i]} ${words[i + 1]}`);
+      // Split into bullet points / lines for independent extraction
+      const lines = notes
+        .split(/[•·\-–—\n\r]+/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 5);
+
+      for (const line of lines) {
+        // Skip section headers and generic filler
+        if (SKIP_SECTIONS.some((r) => r.test(line))) continue;
+
+        const raw = line.trim();
+
+        // First pass: try context patterns (added X, new X, X support, etc.)
+        let matched = false;
+        for (const pattern of FEATURE_PATTERNS) {
+          const matches = raw.matchAll(pattern);
+          for (const m of matches) {
+            const candidate = m[1]?.trim();
+            if (!candidate || candidate.length < 5) continue;
+
+            // Check it's not a generic maintenance phrase
+            const lower = candidate.toLowerCase();
+            if (GENERIC_FEATURES.has(lower)) continue;
+
+            // Filter: must contain at least one real letter-word (not just version numbers)
+            const words = candidate.split(/\s+/).filter((w) => /[a-zA-Z]/.test(w));
+            if (words.length === 0) continue;
+
+            const cleaned = words.join(" ");
+            if (cleaned.length < 4 || seen.has(cleaned)) continue;
+            seen.add(cleaned);
+
+            if (!featureCounts.has(cleaned)) {
+              featureCounts.set(cleaned, { count: 0, apps: [] });
+            }
+            const entry = featureCounts.get(cleaned)!;
+            entry.count++;
+            if (!entry.apps.includes(app.trackName)) {
+              entry.apps.push(app.trackName);
+            }
+            matched = true;
           }
+          if (matched) break; // one pattern match per line is enough
         }
-        for (let i = 0; i < words.length - 2; i++) {
-          if (words[i].length >= 3 && words[i + 1].length >= 3 && words[i + 2].length >= 3) {
-            phrases.push(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
-          }
-        }
 
-        // Also extract individual notable words (capitalized in original = feature names)
-        const notableWords = words.filter((w) => {
-          const orig = app.releaseNotes || "";
-          const idx = orig.toLowerCase().indexOf(w);
-          if (idx >= 0 && idx + w.length < orig.length) {
-            // Check if original has capital letter
-            return orig[idx] === orig[idx].toUpperCase() && orig[idx] !== orig[idx].toLowerCase();
-          }
-          return false;
-        });
-
-        const allPhrases = [...new Set([...phrases, ...notableWords])];
-        for (const phrase of allPhrases) {
-          if (seen.has(phrase)) continue;
-          seen.add(phrase);
-          if (!featureCounts.has(phrase)) {
-            featureCounts.set(phrase, { count: 0, apps: [] });
-          }
-          const entry = featureCounts.get(phrase)!;
-          entry.count++;
-          if (!entry.apps.includes(app.trackName)) {
-            entry.apps.push(app.trackName);
+        // Second pass (if no context match): look for standalone capitalized feature names
+        if (!matched) {
+          const properMatch = raw.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+){2,4})/);
+          if (properMatch) {
+            const candidate = properMatch[0].trim();
+            const lower = candidate.toLowerCase();
+            if (candidate.length >= 6 && !GENERIC_FEATURES.has(lower) && !seen.has(candidate)) {
+              seen.add(candidate);
+              if (!featureCounts.has(candidate)) {
+                featureCounts.set(candidate, { count: 0, apps: [] });
+              }
+              const entry = featureCounts.get(candidate)!;
+              entry.count++;
+              if (!entry.apps.includes(app.trackName)) {
+                entry.apps.push(app.trackName);
+              }
+            }
           }
         }
       }
@@ -120,13 +171,9 @@ export async function GET(request: NextRequest) {
 }
 
 function inferCategory(keyword: string): FeatureMention["category"] {
-  const integKeywords = ["integration", "connect", "sync", "import", "export", "share", "widget", "watch", "siri", "shortcut", "health", "apple", "google", "fitbit", "spotify"];
-  const platKeywords = ["ios", "ipad", "mac", "vision", "watchos", "android", "web", "desktop", "mobile", "tablet"];
-  const imprKeywords = ["improve", "faster", "redesign", "new design", "refresh", "remodel", "optimize", "better", "enhance"];
-
   const kw = keyword.toLowerCase();
-  if (integKeywords.some((k) => kw.includes(k))) return "integration";
-  if (platKeywords.some((k) => kw.includes(k))) return "platform";
-  if (imprKeywords.some((k) => kw.includes(k))) return "improvement";
+  if (/watch|widget|siri|shortcut|health|apple (?:watch|pay|health|fitness)|google|fitbit|spotify|integration|connect|sync|import|export/.test(kw)) return "integration";
+  if (/ios|ipad|mac|vision|watchos|android|web|desktop|mobile|tablet/.test(kw)) return "platform";
+  if (/improve|faster|better|redesign|optimize|enhance|refresh/.test(kw)) return "improvement";
   return "feature";
 }
