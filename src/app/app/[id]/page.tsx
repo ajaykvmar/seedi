@@ -9,6 +9,7 @@ import { Header } from "@/components/header";
 import { AppResult } from "@/lib/types";
 import { Star, ExternalLink, ChevronLeft } from "lucide-react";
 import { KeywordOverlap } from "@/components/keyword-overlap";
+import { ReviewSection } from "@/components/review-section";
 
 function formatCount(count: number): string {
   if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
@@ -180,6 +181,8 @@ export default function AppDetailPage() {
             </div>
           </dl>
         </section>
+
+        <ReviewSection trackId={app.trackId} />
 
         {competitorData && (
           <KeywordOverlap competitors={competitorData.competitors} keywords={competitorData.keywords} />
