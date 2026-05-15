@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { AppResult } from "@/lib/types";
 
 interface AppCardProps {
@@ -9,6 +10,7 @@ interface AppCardProps {
   rank: number;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  clickable?: boolean;
 }
 
 function formatCount(count: number): string {
@@ -28,9 +30,16 @@ function timeSince(dateStr: string): string {
   return `${years}y ${months % 12}mo`;
 }
 
-export function AppCard({ app, rank, isFavorite, onToggleFavorite }: AppCardProps) {
+export function AppCard({ app, rank, isFavorite, onToggleFavorite, clickable = true }: AppCardProps) {
+  const router = useRouter();
+
   return (
-    <div className="flex items-start gap-4 p-4 bg-white border-2 border-black hover:bg-gray-50 transition-colors">
+    <div
+      className={`flex items-start gap-4 p-4 bg-white border-2 border-black transition-colors ${
+        clickable ? "hover:bg-gray-50 cursor-pointer" : ""
+      }`}
+      onClick={clickable ? () => router.push(`/app/${app.trackId}`) : undefined}
+    >
       <div className="flex-shrink-0 w-8 text-center">
         <span className="text-lg font-bold tabular-nums">{rank}</span>
       </div>
@@ -61,27 +70,28 @@ export function AppCard({ app, rank, isFavorite, onToggleFavorite }: AppCardProp
         {onToggleFavorite && (
           <button
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            className={`text-xs font-bold px-2 py-1 border-2 ${
-              isFavorite
-                ? "bg-black text-white border-black"
-                : "border-black hover:bg-black hover:text-white"
-            } transition-colors`}
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleFavorite();
+              }}
+              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              className={`text-xs font-bold px-2 py-1 border-2 ${
+                isFavorite
+                  ? "bg-black text-white border-black"
+                  : "border-black hover:bg-black hover:text-white"
+              } transition-colors`}
+            >
+              {isFavorite ? "SAVED" : "SAVE"}
+            </button>
+          )}
+          <span className="text-sm font-bold tabular-nums">{app.formattedPrice}</span>
+          <a
+            href={app.trackViewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs underline underline-offset-2"
           >
-            {isFavorite ? "SAVED" : "SAVE"}
-          </button>
-        )}
-        <span className="text-sm font-bold tabular-nums">{app.formattedPrice}</span>
-        <a
-          href={app.trackViewUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs underline underline-offset-2"
-        >
           App Store →
         </a>
       </div>
