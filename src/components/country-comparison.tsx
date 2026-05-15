@@ -21,6 +21,8 @@ interface MultiCountryResponse {
   results: CountryScore[];
 }
 
+const LOW_CAPITA = new Set(["br", "mx", "tr", "ru", "pl", "in", "za"]);
+
 const COUNTRY_FLAGS: Record<string, string> = {
   us: "🇺🇸", ca: "🇨🇦", gb: "🇬🇧", au: "🇦🇺", ie: "🇮🇪", nz: "🇳🇿",
   de: "🇩🇪", fr: "🇫🇷", nl: "🇳🇱", be: "🇧🇪", lu: "🇱🇺", at: "🇦🇹",
@@ -28,6 +30,8 @@ const COUNTRY_FLAGS: Record<string, string> = {
   it: "🇮🇹", es: "🇪🇸", cy: "🇨🇾", mt: "🇲🇹",
   jp: "🇯🇵", kr: "🇰🇷", sg: "🇸🇬", hk: "🇭🇰", tw: "🇹🇼",
   ae: "🇦🇪", il: "🇮🇱", qa: "🇶🇦", kw: "🇰🇼",
+  br: "🇧🇷", mx: "🇲🇽", tr: "🇹🇷", ru: "🇷🇺", pl: "🇵🇱",
+  in: "🇮🇳", za: "🇿🇦",
 };
 
 const COUNTRY_NAMES: Record<string, string> = {
@@ -37,6 +41,8 @@ const COUNTRY_NAMES: Record<string, string> = {
   it: "Italy", es: "Spain", cy: "Cyprus", mt: "Malta",
   jp: "Japan", kr: "South Korea", sg: "Singapore", hk: "Hong Kong", tw: "Taiwan",
   ae: "UAE", il: "Israel", qa: "Qatar", kw: "Kuwait",
+  br: "Brazil", mx: "Mexico", tr: "Türkiye", ru: "Russia", pl: "Poland",
+  in: "India", za: "South Africa",
 };
 
 function ScoreBar({ value, label, color }: { value: number; label: string; color: string }) {
@@ -116,6 +122,7 @@ export function CountryComparison() {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">{COUNTRY_FLAGS[r.country] || "🌍"}</span>
                   <span className="font-semibold">{COUNTRY_NAMES[r.country] || r.country.toUpperCase()}</span>
+                  {LOW_CAPITA.has(r.country) && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground/60 border-muted-foreground/20">low capita</Badge>}
                   {r.error && <Badge variant="outline" className="text-xs ml-auto">No data</Badge>}
                 </div>
                 {!r.error ? (

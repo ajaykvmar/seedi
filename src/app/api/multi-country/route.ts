@@ -15,6 +15,10 @@ const DEFAULT_COUNTRIES = [
   "jp", "kr", "sg", "hk", "tw",
   // Middle East wealthy
   "ae", "il", "qa", "kw",
+  // Upper-middle income (large mobile markets, lower per capita)
+  "br", "mx", "tr", "ru", "pl",
+  // Lower-income (huge mobile-first audiences)
+  "in", "za",
 ];
 
 export async function GET(request: NextRequest) {
